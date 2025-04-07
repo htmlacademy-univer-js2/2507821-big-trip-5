@@ -38,6 +38,7 @@ export default class MainPagePresenter {
 
     // Добавление точек и обработчиков событий
     for (let i = 0; i < this.points.length; i++) {
+      // Если точек нет, то сообщить об этом пользователю
       const point = new TripPointView({point: this.points[i]});
       const button = point.element.querySelector('.event__rollup-btn');
       button.addEventListener('click', () => {
@@ -50,8 +51,5 @@ export default class MainPagePresenter {
       });
       render(point, this.tripEventsList.element);
     }
-
-    // render(this.addNewPointForm, this.tripEventsList.element, RenderPosition.AFTERBEGIN);
-    // render(this.editPointForm, this.tripEventsList.element, RenderPosition.AFTERBEGIN);
   }
 }
