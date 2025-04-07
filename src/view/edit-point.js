@@ -1,4 +1,4 @@
-import { createElement } from '../render';
+import AbstractView from '../framework/view/abstract-view';
 
 const createOffersTemplate = (offers) => {
   const offersList = [];
@@ -83,7 +83,7 @@ const createEditPointFormTemplate = (point) => {
 
                   <div class="event__field-group  event__field-group--destination">
                     <label class="event__label  event__type-output" for="event-destination-1">
-                      ${type}
+                       ${type}
                     </label>
                     <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="Chamonix" list="destination-list-1">
                     <datalist id="destination-list-1">
@@ -133,24 +133,15 @@ const createEditPointFormTemplate = (point) => {
             </li>`;
 };
 
-export default class EditPointFormView {
+export default class EditPointFormView extends AbstractView {
+  #point;
+
   constructor({point}) {
-    this.point = point;
+    super();
+    this.#point = point;
   }
 
-  getTemplate() {
-    return createEditPointFormTemplate(this.point);
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
+  get template() {
+    return createEditPointFormTemplate(this.#point);
   }
 }
