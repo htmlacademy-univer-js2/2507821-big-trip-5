@@ -1,4 +1,6 @@
 import AbstractView from '../framework/view/abstract-view';
+import EditPointFormView from './edit-point-view';
+import { replace } from '../framework/render';
 
 const createOffersTemplate = (offers) => {
   const offersList = [];
@@ -54,13 +56,30 @@ const createTripPointTemplate = (point) => {
 
 export default class TripPointView extends AbstractView {
   #point;
+  #EditPointFormView;
+  #removeKeyDownHandler;
 
-  constructor({point}) {
+  constructor({point, handleEsc}) {
     super();
     this.#point = point;
+    this.#EditPointFormView = new EditPointFormView({pointView: this, point});
+
+    const button = this.element.querySelector('button.event__rollup-btn');
+    button.addEventListener('click', () => {
+      replace(this.#EditPointFormView, this);
+      this.#removeKeyDownHandler = handleEsc(replace, this, this.#EditPointFormView);
+    });
+  }
+
+  get point() {
+    return this.#point;
   }
 
   get template() {
     return createTripPointTemplate(this.#point);
+  }
+
+  get removeKeyDownHandler() {
+    return this.#removeKeyDownHandler;
   }
 }

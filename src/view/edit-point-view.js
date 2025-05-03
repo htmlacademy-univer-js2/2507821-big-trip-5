@@ -1,3 +1,4 @@
+import { replace } from '../framework/render';
 import AbstractView from '../framework/view/abstract-view';
 
 const createOffersTemplate = (offers) => {
@@ -134,14 +135,27 @@ const createEditPointFormTemplate = (point) => {
 };
 
 export default class EditPointFormView extends AbstractView {
-  #point;
+  #pointView;
 
-  constructor({point}) {
+  constructor({pointView}) {
     super();
-    this.#point = point;
+    this.#pointView = pointView;
+
+    const closeEditForm = () => {
+      replace(this.#pointView, this);
+      this.#pointView.removeKeyDownHandler();
+    };
+
+    this.element.querySelector('form').addEventListener('submit', () => {
+      closeEditForm();
+    });
+
+    this.element.querySelector('button.event__rollup-btn').addEventListener('click', () => {
+      closeEditForm();
+    });
   }
 
   get template() {
-    return createEditPointFormTemplate(this.#point);
+    return createEditPointFormTemplate(this.#pointView.point);
   }
 }
