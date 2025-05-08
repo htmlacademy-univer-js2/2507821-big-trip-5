@@ -1,11 +1,15 @@
 import { getRandomPoint } from '../mock/points';
 
-const POINT_COUNT = 3;
+const POINT_COUNT = 5;
 
 export default class PointsModel {
-  points = Array.from({length: POINT_COUNT}, getRandomPoint);
+  #points;
+
+  constructor({ pointsCount = POINT_COUNT}) {
+    this.#points = Array.from({length: pointsCount}, getRandomPoint);
+  }
 
   getPoints() {
-    return this.points;
+    return this.#points;
   }
 }
