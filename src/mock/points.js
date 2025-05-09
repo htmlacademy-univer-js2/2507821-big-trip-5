@@ -1,4 +1,4 @@
-import { getRandomArrayElement, getRandomNumber } from '../utils/utils';
+import { getRandomNumber, getRandomArrayElement } from '../utils/utils';
 
 const POINTTYPE = ['Taxi', 'Bus', 'Train', 'Ship', 'Drive', 'Flight', 'Check-in', 'Sightseeing', 'Restaurant'];
 

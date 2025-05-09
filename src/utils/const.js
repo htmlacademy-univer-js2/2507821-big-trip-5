@@ -7,5 +7,13 @@ const FylterType = {
   PAST: 'PAST'
 };
 
-export {DATE_FORMAT, FylterType};
+const SortType = {
+  DEFAULT: 'day',
+  EVENT: 'event',
+  TIME: 'time',
+  PRICE: 'price',
+  OFFERS: 'offers'
+};
+
+export {DATE_FORMAT, FylterType, SortType};
 
