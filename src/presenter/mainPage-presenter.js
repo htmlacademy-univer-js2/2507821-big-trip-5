@@ -7,6 +7,8 @@ import TripPointsPresenter from './trip-point-presenter';
 import NoPointView from '../view/no-point-view';
 import TripPointPresenter from './trip-point-presenter';
 import { updateItem } from '../utils/utils';
+import PointsModel from '../model/points-model';
+import DestinationsModel from '../model/destinations-model';
 
 
 export default class MainPagePresenter {
@@ -19,10 +21,11 @@ export default class MainPagePresenter {
   #tripPointPresenters = new Map();
 
 
-  constructor({filtersContainer, contentContainer, pointsModel}) {
+  constructor({filtersContainer, contentContainer, pointsModel, destinationsModel}) {
     this.filtersContainer = filtersContainer;
     this.contentContainer = contentContainer;
     this.pointsModel = pointsModel;
+    this.destinationsModel = destinationsModel;
     this.tripPointsPresenter = new TripPointsPresenter({points: [...this.pointsModel.getPoints()], container: this.#tripEventsList});
   }
 
@@ -57,17 +60,28 @@ export default class MainPagePresenter {
   #handleTripPointChange = (updatedPoint) => {
     this.#points = updateItem(this.#points, updatedPoint);
     this.#tripPointPresenters.get(updatedPoint.id).init(updatedPoint);
+    // console.log(this.#points);
   };
 
   #handleTripPointModeChange = () => {
     this.#tripPointPresenters.forEach((presenter) => presenter.resetView());
   };
 
+  #handleTripPointTypeChange = (newType) => PointsModel.getPointTypeOffers(newType);
+
+  #handleTripPointDestinationChange = (destinationId) => DestinationsModel.getDestination(destinationId);
+
+  #getDestinationNameById = (destinationId) => DestinationsModel.getDestination(destinationId).name;
+
   #renderTripPoint(point) {
     const tripPointPresenter = new TripPointPresenter({
+      destinations: DestinationsModel.getAllDestinations(),
       tripPointsContainer: this.#tripEventsList.element,
+      getDestinationName: this.#getDestinationNameById,
       onDataChange: this.#handleTripPointChange,
-      onModeChange: this.#handleTripPointModeChange
+      onModeChange: this.#handleTripPointModeChange,
+      onTypeChange: this.#handleTripPointTypeChange,
+      onDestinationChange: this.#handleTripPointDestinationChange
     });
     tripPointPresenter.init(point);
     this.#tripPointPresenters.set(point.id, tripPointPresenter);
