@@ -25,6 +25,7 @@ const createFiltersTemplate = () => `<form class="trip-filters" action="#" metho
               </form>`;
 
 // 7.1
+// 8.3
 export default class FiltersView extends AbstractView {
   get template() {
     return createFiltersTemplate();
