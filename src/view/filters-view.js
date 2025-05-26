@@ -24,6 +24,7 @@ const createFiltersTemplate = () => `<form class="trip-filters" action="#" metho
                 <button class="visually-hidden" type="submit">Accept filter</button>
               </form>`;
 
+// 7.1
 export default class FiltersView extends AbstractView {
   get template() {
     return createFiltersTemplate();
