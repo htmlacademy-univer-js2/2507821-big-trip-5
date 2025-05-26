@@ -22,4 +22,3 @@ const TripPointData = {
 };
 
 export {DATE_FORMAT, FylterType, TripPointData, API_DATE_FORMAT, EDIT_TRIP_POINT_DATE_FORMAT};
-
