@@ -1,12 +1,15 @@
+import dayjs from 'dayjs';
 import AbstractView from '../framework/view/abstract-view';
 import { humanizeTripPointDate } from '../utils/trip-point';
+import { API_DATE_FORMAT } from '../utils/const';
+import { getEventDuration } from '../utils/utils';
 
 const createOffersTemplate = (offers) => {
   const offersList = [];
   for (let i = 0; i < offers.length; i++) {
-    const {name, price} = offers[i];
+    const {title, price} = offers[i];
     const listItem = `<li class="event__offer">
-                    <span class="event__offer-title">${name}</span>
+                    <span class="event__offer-title">${title}</span>
                     &plus;&euro;&nbsp;
                     <span class="event__offer-price">${price}</span>
                   </li>`;
@@ -16,25 +19,24 @@ const createOffersTemplate = (offers) => {
 };
 
 const createTripPointTemplate = (point) => {
-  const {type, destination, timeStr, duration, price, offers, isFavorite, date} = point;
-  const [startTime, endTime] = timeStr.split(' - ');
+  const {type, destinationName, dateFrom, dateTo, basePrice, offers, isFavorite, date} = point;
   return `<li class="trip-events__item">
               <div class="event">
                 <time class="event__date" datetime="2019-03-18">${humanizeTripPointDate(date)}</time>
                 <div class="event__type">
-                  <img class="event__type-icon" width="42" height="42" src="img/icons/drive.png" alt="Event type icon">
+                  <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
                 </div>
-                <h3 class="event__title">${type} ${destination}</h3>
+                <h3 class="event__title">${type} ${destinationName}</h3>
                 <div class="event__schedule">
                   <p class="event__time">
-                    <time class="event__start-time" datetime="2019-03-18T14:30">${startTime}</time>
+                    <time class="event__start-time" datetime="${dateFrom}">${dayjs(dateFrom, API_DATE_FORMAT).format('H:mm')}</time>
                     &mdash;
-                    <time class="event__end-time" datetime="2019-03-18T16:05">${endTime}</time>
+                    <time class="event__end-time" datetime="${dateTo}">${dayjs(dateTo, API_DATE_FORMAT).format('H:mm')}</time>
                   </p>
-                  <p class="event__duration">${duration}</p>
+                  <p class="event__duration">${getEventDuration(dayjs(dateTo).diff(dateFrom))}</p>
                 </div>
                 <p class="event__price">
-                  &euro;&nbsp;<span class="event__price-value">${price}</span>
+                  &euro;&nbsp;<span class="event__price-value">${basePrice}</span>
                 </p>
                 <h4 class="visually-hidden">Offers:</h4>
                 <ul class="event__selected-offers">
@@ -80,12 +82,6 @@ export default class TripPointView extends AbstractView {
   #pointFavoriteHandler = (evt) => {
     evt.preventDefault();
     this.#handleFavoriteClick();
-    // const button = evt.target.closest('.event__favorite-btn');
-    // if (!this.#point.isFavorite) {
-    //   button.classList.remove('event__favorite-btn--active');
-    // } else {
-    //   button.classList.add('event__favorite-btn--active');
-    // }
   };
 
   #editClickHandler = (evt) => {

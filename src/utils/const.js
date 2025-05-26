@@ -1,4 +1,7 @@
-const DATE_FORMAT = 'D MMM';
+const DATE_FORMAT = 'D MMM'; // 6.2
+const API_DATE_FORMAT = 'YYYY-MM-DDTHH:mm:ss';
+const EDIT_TRIP_POINT_DATE_FORMAT = 'DD/MM/YY HH:mm';
+
 
 const FylterType = {
   EVERYTHING: 'EVERYTHING',
@@ -7,13 +10,15 @@ const FylterType = {
   PAST: 'PAST'
 };
 
-const SortType = {
-  DEFAULT: 'day',
-  EVENT: 'event',
-  TIME: 'time',
-  PRICE: 'price',
-  OFFERS: 'offers'
+const TripPointData = {
+  type: null,
+  destination: null,
+  timeStr: null,
+  date: null,
+  duration: null,
+  price: null,
+  offers: [],
+  isFavorite: null
 };
 
-export {DATE_FORMAT, FylterType, SortType};
-
+export {DATE_FORMAT, FylterType, TripPointData, API_DATE_FORMAT, EDIT_TRIP_POINT_DATE_FORMAT};

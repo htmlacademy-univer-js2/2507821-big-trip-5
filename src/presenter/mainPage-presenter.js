@@ -7,26 +7,26 @@ import TripPointsPresenter from './trip-point-presenter';
 import NoPointView from '../view/no-point-view';
 import TripPointPresenter from './trip-point-presenter';
 import { updateItem } from '../utils/utils';
-import { SortType } from '../utils/const';
+import PointsModel from '../model/points-model';
+import DestinationsModel from '../model/destinations-model';
 
 
 export default class MainPagePresenter {
-  #filtersComponent = new FiltersView();
-  #sortComponent = null;
-  #tripEventsListComponent = new TripEventsListView();
-  #addNewPointFormComponent = new AddNewPointFormView();
+  #filters = new FiltersView();
+  #sort = new SortView();
+  #tripEventsList = new TripEventsListView();
+  #addNewPointForm = new AddNewPointFormView();
   #noPointsView = new NoPointView();
   #points = [];
   #tripPointPresenters = new Map();
-  #currentSortType = SortType.DEFAULT;
-  #sourcedTripPoints = [];
 
 
-  constructor({filtersContainer, contentContainer, pointsModel}) {
+  constructor({filtersContainer, contentContainer, pointsModel, destinationsModel}) {
     this.filtersContainer = filtersContainer;
     this.contentContainer = contentContainer;
     this.pointsModel = pointsModel;
-    this.tripPointsPresenter = new TripPointsPresenter({points: [...this.pointsModel.getPoints()], container: this.#tripEventsListComponent});
+    this.destinationsModel = destinationsModel;
+    this.tripPointsPresenter = new TripPointsPresenter({points: [...this.pointsModel.getPoints()], container: this.#tripEventsList});
   }
 
   init() {
@@ -38,9 +38,9 @@ export default class MainPagePresenter {
   }
 
   #renderTripPointsList() {
-    render(this.#filtersComponent, this.filtersContainer);
-    this.#renderSort();
-    render(this.#tripEventsListComponent, this.contentContainer);
+    render(this.#filters, this.filtersContainer);
+    render(this.#sort, this.contentContainer);
+    render(this.#tripEventsList, this.contentContainer);
 
     if (!(this.#points.length !== 0 && this.#points.every((point) => point !== undefined && point !== null))) {
       render(this.#noPointsView, this.contentContainer);
@@ -59,41 +59,29 @@ export default class MainPagePresenter {
 
   #handleTripPointChange = (updatedPoint) => {
     this.#points = updateItem(this.#points, updatedPoint);
-    this.#sourcedTripPoints = updateItem(this.#sourcedTripPoints, updatedPoint);
     this.#tripPointPresenters.get(updatedPoint.id).init(updatedPoint);
+    // console.log(this.#points);
   };
 
   #handleTripPointModeChange = () => {
     this.#tripPointPresenters.forEach((presenter) => presenter.resetView());
   };
 
-  #sortTripPoints(sortType) {
-    switch (sortType) {
-      case SortType.EVENT:
-        this.#points.sort();
-        break;
-      default:
-        this.#points = [...this.#sourcedTripPoints];
-    }
-  }
+  #handleTripPointTypeChange = (newType) => PointsModel.getPointTypeOffers(newType);
 
-  #handleSortTypeChange = (sortType) => {
-    if (this.#currentSortType === sortType) {
-      return;
-    }
-    this.#sortTripPoints(sortType);
-  };
+  #handleTripPointDestinationChange = (destinationId) => DestinationsModel.getDestination(destinationId);
 
-  #renderSort() {
-    this.#sortComponent = new SortView({onSortTypeChange: this.#handleSortTypeChange});
-    render(this.#sortComponent, this.contentContainer);
-  }
+  #getDestinationNameById = (destinationId) => DestinationsModel.getDestination(destinationId).name;
 
   #renderTripPoint(point) {
     const tripPointPresenter = new TripPointPresenter({
-      tripPointsContainer: this.#tripEventsListComponent.element,
+      destinations: DestinationsModel.getAllDestinations(),
+      tripPointsContainer: this.#tripEventsList.element,
+      getDestinationName: this.#getDestinationNameById,
       onDataChange: this.#handleTripPointChange,
-      onModeChange: this.#handleTripPointModeChange
+      onModeChange: this.#handleTripPointModeChange,
+      onTypeChange: this.#handleTripPointTypeChange,
+      onDestinationChange: this.#handleTripPointDestinationChange
     });
     tripPointPresenter.init(point);
     this.#tripPointPresenters.set(point.id, tripPointPresenter);
