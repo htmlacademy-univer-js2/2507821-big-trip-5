@@ -1,4 +1,4 @@
-const DATE_FORMAT = 'D MMM';
+const DATE_FORMAT = 'D MMM'; // 6.2
 const API_DATE_FORMAT = 'YYYY-MM-DDTHH:mm:ss';
 const EDIT_TRIP_POINT_DATE_FORMAT = 'DD/MM/YY HH:mm';
 

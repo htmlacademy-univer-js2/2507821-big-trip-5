@@ -2,6 +2,12 @@ import dayjs from 'dayjs';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
 import { EDIT_TRIP_POINT_DATE_FORMAT } from '../utils/const';
 
+const createDestinationPicturesTemplate = (pictures) => {
+  const destinationPicturesList = [];
+  pictures.forEach((picture) => destinationPicturesList.push(`<img class="event__photo" src="${picture.src}" alt="${picture.description}">`));
+  return destinationPicturesList.join('\n');
+};
+
 const createDestinationsTemplate = (destinations) => {
   const destinationsList = [];
   destinations.forEach((destination) => destinationsList.push(`<option value="${destination.name}" data-destination-id="${destination.id}"></option>`));
@@ -122,18 +128,26 @@ const createEditPointFormTemplate = (data, destinations) => {
                   </button>
                 </header>
                 <section class="event__details">
-                ${(offers.length !== 0) ? `<section class="event__section  event__section--offers">
-                  <h3 class="event__section-title  event__section-title--offers">Offers</h3>
+                  ${(offers.length !== 0) ? `
+                    <section class="event__section  event__section--offers">
+                      <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
-                  <div class="event__available-offers">
-                    ${createOffersTemplate(offers)}
-                  </div>
-                </section>` : ''}
+                      <div class="event__available-offers">
+                        ${createOffersTemplate(offers)}
+                      </div>
+                    </section>` : ''}
 
                   <section class="event__section  event__section--destination">
-                  ${ (destinationObj.description) ? `
-                    <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-                    <p class="event__destination-description">${destinationObj.description}</p>` : ''}
+                    ${(destinationObj.description) ? `
+                      <h3 class="event__section-title  event__section-title--destination">Destination</h3>
+                      <p class="event__destination-description">${destinationObj.description}</p>` : ''}
+
+                    ${(destinationObj.pictures.length !== 0) ? `
+                      <div class="event__photos-container">
+                        <div class="event__photos-tape">
+                          ${createDestinationPicturesTemplate(destinationObj.pictures)}
+                        </div>
+                      </div>` : ''}
                   </section>
                 </section>
               </form>
@@ -142,7 +156,6 @@ const createEditPointFormTemplate = (data, destinations) => {
 
 export default class EditPointFormView extends AbstractStatefulView {
   #destinations = null;
-  #sourcePoint = null;
 
   #handleFormSubmit = null;
   #handleFormClose = null;
@@ -152,7 +165,6 @@ export default class EditPointFormView extends AbstractStatefulView {
   constructor({point, onFormSubmit, onFormClose, onTypeChange, onDestinationChange, destinations}) {
     super();
     this._setState(EditPointFormView.parsePointToState(point));
-    this.#sourcePoint = point;
     this.#handleFormSubmit = onFormSubmit;
     this.#handleFormClose = onFormClose;
     this.#handleTypeChange = onTypeChange;
