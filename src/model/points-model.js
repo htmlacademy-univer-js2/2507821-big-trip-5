@@ -10,7 +10,15 @@ export default class PointsModel {
     this.#points = Array.from({length: pointsCount}, getRandomPoint);
   }
 
-  getPoints() {
+  updatePoints = (points) => {
+    this.#points = points;
+  };
+
+  // updatePoint = (id) => {
+  //   return 1
+  // };
+
+  get points() {
     return this.#points;
   }
 

@@ -1,6 +1,8 @@
 import dayjs from 'dayjs';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
-import { EDIT_TRIP_POINT_DATE_FORMAT } from '../utils/const';
+import { EDIT_TRIP_POINT_DATE_FORMAT, EDIT_TRIP_POINT_DATE_FORMAT_FLATPICKR } from '../utils/const';
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
 
 const createDestinationPicturesTemplate = (pictures) => {
   const destinationPicturesList = [];
@@ -48,47 +50,47 @@ const createEditPointFormTemplate = (data, destinations) => {
                         <legend class="visually-hidden">Event type</legend>
 
                         <div class="event__type-item">
-                          <input id="event-type-taxi-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="taxi">
+                          <input id="event-type-taxi-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="taxi" ${ (type === 'taxi') ? 'checked' : '' }>
                           <label class="event__type-label  event__type-label--taxi" for="event-type-taxi-1">Taxi</label>
                         </div>
 
                         <div class="event__type-item">
-                          <input id="event-type-bus-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="bus">
+                          <input id="event-type-bus-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="bus" ${ (type === 'bus') ? 'checked' : '' }>
                           <label class="event__type-label  event__type-label--bus" for="event-type-bus-1">Bus</label>
                         </div>
 
                         <div class="event__type-item">
-                          <input id="event-type-train-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="train">
+                          <input id="event-type-train-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="train" ${ (type === 'train') ? 'checked' : '' }>
                           <label class="event__type-label  event__type-label--train" for="event-type-train-1">Train</label>
                         </div>
 
                         <div class="event__type-item">
-                          <input id="event-type-ship-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="ship">
+                          <input id="event-type-ship-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="ship" ${ (type === 'ship') ? 'checked' : '' }>
                           <label class="event__type-label  event__type-label--ship" for="event-type-ship-1">Ship</label>
                         </div>
 
                         <div class="event__type-item">
-                          <input id="event-type-drive-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="drive">
+                          <input id="event-type-drive-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="drive" ${ (type === 'drive') ? 'checked' : '' }>
                           <label class="event__type-label  event__type-label--drive" for="event-type-drive-1">Drive</label>
                         </div>
 
                         <div class="event__type-item">
-                          <input id="event-type-flight-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="flight" checked>
+                          <input id="event-type-flight-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="flight" ${ (type === 'flight') ? 'checked' : '' }>
                           <label class="event__type-label  event__type-label--flight" for="event-type-flight-1">Flight</label>
                         </div>
 
                         <div class="event__type-item">
-                          <input id="event-type-check-in-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="check-in">
+                          <input id="event-type-check-in-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="check-in" ${ (type === 'check-in') ? 'checked' : '' }>
                           <label class="event__type-label  event__type-label--check-in" for="event-type-check-in-1">Check-in</label>
                         </div>
 
                         <div class="event__type-item">
-                          <input id="event-type-sightseeing-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="sightseeing">
+                          <input id="event-type-sightseeing-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="sightseeing" ${ (type === 'sightseeing') ? 'checked' : '' }>
                           <label class="event__type-label  event__type-label--sightseeing" for="event-type-sightseeing-1">Sightseeing</label>
                         </div>
 
                         <div class="event__type-item">
-                          <input id="event-type-restaurant-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="restaurant">
+                          <input id="event-type-restaurant-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="restaurant" ${ (type === 'restaurant') ? 'checked' : '' }>
                           <label class="event__type-label  event__type-label--restaurant" for="event-type-restaurant-1">Restaurant</label>
                         </div>
                       </fieldset>
@@ -156,6 +158,8 @@ const createEditPointFormTemplate = (data, destinations) => {
 
 export default class EditPointFormView extends AbstractStatefulView {
   #destinations = null;
+  #datePickerStart = null;
+  #datePickerEnd = null;
 
   #handleFormSubmit = null;
   #handleFormClose = null;
@@ -204,6 +208,45 @@ export default class EditPointFormView extends AbstractStatefulView {
     this.updateElement({destination: newDestinationId, destinationObj: newDestinationObj});
   };
 
+  #dateStartChangeHandler = ([userDate]) => {
+    console.log(Object.prototype.toString.call(userDate));
+    this.#datePickerEnd.set('minDate', userDate);
+    this._setState({dateFrom: userDate});
+  };
+
+  #dateEndChangeHandler = ([userDate]) => {
+    this.#datePickerStart.set('maxDate', userDate);
+    this._setState({dateTo: userDate});
+  };
+
+  #setDatePicker = () => {
+    this.#datePickerStart = flatpickr(
+      this.element.querySelector('.event__input--time[name="event-start-time"]'),
+      {
+        defaultDate: this._state.dateFrom,
+        onChange: this.#dateStartChangeHandler,
+        enableTime: true,
+        dateFormat: EDIT_TRIP_POINT_DATE_FORMAT_FLATPICKR,
+        maxDate: this._state.dateTo,
+        // eslint-disable-next-line camelcase
+        time_24hr: true
+      }
+    );
+
+    this.#datePickerEnd = flatpickr(
+      this.element.querySelector('.event__input--time[name="event-end-time"]'),
+      {
+        defaultDate: this._state.dateTo,
+        onChange: this.#dateEndChangeHandler,
+        enableTime: true,
+        dateFormat: EDIT_TRIP_POINT_DATE_FORMAT_FLATPICKR,
+        minDate: this._state.dateFrom,
+        // eslint-disable-next-line camelcase
+        time_24hr: true
+      }
+    );
+  };
+
   static parsePointToState(point) {
     return {
       ...point,
@@ -218,6 +261,20 @@ export default class EditPointFormView extends AbstractStatefulView {
     return point;
   }
 
+  removeElement() {
+    super.removeElement();
+
+    if (this.#datePickerStart) {
+      this.#datePickerStart.destroy();
+      this.#datePickerStart = null;
+    }
+
+    if (this.#datePickerEnd) {
+      this.#datePickerEnd.destroy();
+      this.#datePickerEnd = null;
+    }
+  }
+
   reset(point) {
     this.updateElement(
       EditPointFormView.parsePointToState(point)
@@ -229,5 +286,7 @@ export default class EditPointFormView extends AbstractStatefulView {
     this.element.querySelector('.event__type-list').addEventListener('click', this.#typeChangeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationChangeHandler);
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#formCloseHandler);
+
+    this.#setDatePicker();
   }
 }
