@@ -1,7 +1,7 @@
 import TripPointView from '../view/trip-point-view';
 import EditPointFormView from '../view/edit-point-view';
 import { remove, render, replace } from '../framework/render';
-import DestinationsModel from '../model/destinations-model';
+import { UpdateType, UserAction } from '../utils/const';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -12,7 +12,8 @@ export default class TripPointPresenter {
   #tripPointsContainer = null;
   #point = null;
   #mode = Mode.DEFAULT;
-  #destinations = null;
+  #destinationsModel = null;
+  #offersModel = null;
 
   #pointComponent = null;
   #pointEditComponent = null;
@@ -24,13 +25,14 @@ export default class TripPointPresenter {
 
   #getDestinationName = null;
 
-  constructor({tripPointsContainer, onDataChange, onModeChange, onTypeChange, onDestinationChange, destinations, getDestinationName}) {
-    this.#destinations = destinations;
+  constructor({tripPointsContainer, onDataChange, onModeChange, onDestinationChange, onTypeChange, getDestinationName, destinationsModel, offersModel}) {
+    this.#destinationsModel = destinationsModel;
+    this.#offersModel = offersModel;
     this.#tripPointsContainer = tripPointsContainer;
     this.#handleDataChange = onDataChange;
     this.#handleModeChange = onModeChange;
-    this.#handleTypeChange = onTypeChange;
     this.#handleDestinationChange = onDestinationChange;
+    this.#handleTypeChange = onTypeChange;
 
     this.#getDestinationName = getDestinationName;
   }
@@ -44,6 +46,7 @@ export default class TripPointPresenter {
     this.#pointComponent = new TripPointView({
       point: {
         ...this.#point,
+        offers: this.#offersModel.getOfferByOfferId(this.#point.type, this.#point.offers),
         destinationName: this.#getDestinationName(this.#point.destination)
       },
       onFavoriteClick: this.#onFavoriteTripPointClick,
@@ -53,13 +56,15 @@ export default class TripPointPresenter {
     this.#pointEditComponent = new EditPointFormView({
       point: {
         ...this.#point,
-        destinationObj: DestinationsModel.getDestination(this.#point.destination)
+        destinationObject: this.#destinationsModel.getDestination(this.#point.destination)
       },
-      destinations: this.#destinations,
+      offersObject: this.#offersModel.getOffersByType(this.#point.type),
+      destinations: this.#destinationsModel.destinations,
       onFormSubmit: this.#onTripPointEditFormSubmit,
       onFormClose: this.#onTripPointEditFormClose,
       onTypeChange: this.#onTripPointTypeChange,
-      onDestinationChange: this.#onTripPointDestinationChange
+      onDestinationChange: this.#onTripPointDestinationChange,
+      onDeleteClick: this.#onTripPointDeleteClick
     });
 
     if (prevPointComponent === null || prevEditPointComponent === null) {
@@ -72,7 +77,8 @@ export default class TripPointPresenter {
     }
 
     if (this.#mode === Mode.EDITING) {
-      replace(this.#pointEditComponent, prevEditPointComponent);
+      replace(this.#pointComponent, prevEditPointComponent);
+      this.#mode = Mode.DEFAULT;
     }
 
     remove(prevPointComponent);
@@ -91,17 +97,49 @@ export default class TripPointPresenter {
     }
   }
 
+  setSaving() {
+    if (this.#mode === Mode.EDITING) {
+      this.#pointEditComponent.updateElement({
+        isSaving: true,
+      });
+    }
+  }
+
+  setDeleting() {
+    if (this.#mode === Mode.EDITING) {
+      this.#pointEditComponent.updateElement({
+        isDeleting: true,
+      });
+    }
+  }
+
   #escKeyDownHandler = (evt) => {
     if (evt.key === 'Escape' || evt.key === 'Esc') {
       evt.preventDefault();
       this.#pointEditComponent.reset({
         ...this.#point,
-        destinationObj: DestinationsModel.getDestination(this.#point.destination)
+        destinationObject: this.#destinationsModel.getDestination(this.#point.destination)
       });
       this.#replaceFormToCard();
       document.removeEventListener('keydown', this.#escKeyDownHandler);
     }
   };
+
+  setAborting() {
+    if (this.#mode === Mode.DEFAULT) {
+      this.#pointComponent.shake();
+      return;
+    }
+
+    const resetFormState = () => {
+      this.#pointEditComponent.updateElement({
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this.#pointEditComponent.shake(resetFormState);
+  }
 
   #replaceCardToForm() {
     replace(this.#pointEditComponent, this.#pointComponent);
@@ -120,24 +158,39 @@ export default class TripPointPresenter {
   };
 
   #onTripPointEditFormSubmit = (point) => {
-    this.#handleDataChange(point);
-    this.#onTripPointEditFormClose();
+    this.#handleDataChange(
+      UserAction.UPDATE_POINT,
+      UpdateType.MINOR,
+      point
+    );
   };
 
   #onTripPointEditFormClose = () => {
     this.#pointEditComponent.reset({
       ...this.#point,
-      destinationObj: DestinationsModel.getDestination(this.#point.destination)
+      destinationObject: this.#destinationsModel.getDestination(this.#point.destination)
     });
     this.#replaceFormToCard();
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   };
 
   #onFavoriteTripPointClick = () => {
-    this.#handleDataChange({...this.#point, isFavorite: !this.#point.isFavorite});
+    this.#handleDataChange(
+      UserAction.UPDATE_POINT,
+      UpdateType.MINOR,
+      {...this.#point, isFavorite: !this.#point.isFavorite}
+    );
   };
 
   #onTripPointTypeChange = (type) => this.#handleTypeChange(type);
 
   #onTripPointDestinationChange = (destinationId) => this.#handleDestinationChange(destinationId);
+
+  #onTripPointDeleteClick = (point) => {
+    this.#handleDataChange(
+      UserAction.DELETE_POINT,
+      UpdateType.MINOR,
+      point
+    );
+  };
 }
