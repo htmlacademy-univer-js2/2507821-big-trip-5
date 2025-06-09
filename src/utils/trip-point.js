@@ -25,4 +25,26 @@ const sortByTime = (pointA, pointB) => {
   return 0;
 };
 
-export {humanizeTripPointDate, sortByPrice, sortByTime};
+const isFutureTripPoint = (date) => {
+  const now = dayjs();
+  const startDate = dayjs(date);
+
+  return startDate.isAfter(now);
+};
+
+const isPresentTripPoint = (dateStart, dateEnd) => {
+  const now = dayjs();
+  const startDate = dayjs(dateStart);
+  const endDate = dayjs(dateEnd);
+
+  return startDate.isBefore(now) && endDate.isAfter(now);
+};
+
+const isPastTripPoint = (date) => {
+  const now = dayjs();
+  const endDate = dayjs(date);
+
+  return endDate.isBefore(now);
+};
+
+export {humanizeTripPointDate, sortByPrice, sortByTime, isFutureTripPoint, isPresentTripPoint, isPastTripPoint};
