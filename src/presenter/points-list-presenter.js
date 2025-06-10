@@ -1,4 +1,4 @@
-import { render, remove } from '../framework/render';
+import { render, remove, RenderPosition } from '../framework/render';
 import SortView from '../view/sort-view';
 import TripEventsListView from '../view/trip-events-list-view';
 import NoPointView from '../view/no-point-view';
@@ -108,7 +108,6 @@ export default class PointsListPresenter {
   }
 
   #renderBoard() {
-    this.#renderSort();
     render(this.#tripEventsListComponent, this.#contentContainer);
 
     if (this.#isAbort) {
@@ -129,6 +128,8 @@ export default class PointsListPresenter {
       return;
     }
 
+    this.#renderSort();
+
     this.#renderTripPoints(this.points);
   }
 
@@ -141,7 +142,7 @@ export default class PointsListPresenter {
       currentSortType: this.#currentSortType,
       onSortTypeChange: this.#handleSortTypeChange
     });
-    render(this.#sortComponent, this.#contentContainer);
+    render(this.#sortComponent, this.#contentContainer, RenderPosition.AFTERBEGIN);
   }
 
   #renderTripPoint(point) {
