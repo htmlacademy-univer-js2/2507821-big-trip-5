@@ -63,6 +63,7 @@ export default class NewPointPresenter {
 
   setSaving() {
     this.#tripPointEditComponent.updateElement({
+      isDisabled: true,
       isSaving: true,
     });
   }
@@ -70,6 +71,7 @@ export default class NewPointPresenter {
   setAborting() {
     const resetFormState = () => {
       this.#tripPointEditComponent.updateElement({
+        isDisabled: false,
         isSaving: false,
         isDeleting: false,
       });

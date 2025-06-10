@@ -16,18 +16,18 @@ const createDestinationsTemplate = (destinations) => {
   return destinationsList.join('\n');
 };
 
-const createDestinationsContainerTemplate = ({destinations, destinationObject = {}}) => `
-    <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${(destinationObject.name) ? destinationObject.name : ''}" list="destination-list-1">
+const createDestinationsContainerTemplate = ({destinations, destinationObject = {}, isDisabled}) => `
+    <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${(destinationObject.name) ? destinationObject.name : ''}" list="destination-list-1" ${isDisabled ? 'disabled' : ''}>
     <datalist id="destination-list-1">
       ${createDestinationsTemplate(destinations)}
     </datalist>`;
 
-const createOffersTemplate = (offers, offersObject) => {
+const createOffersTemplate = (offers, offersObject, isDisabled) => {
   const offersElements = [];
   for (let i = 0; i < offersObject.length; i++) {
     const {id, title, price} = offersObject[i];
     const offerElement = `<div class="event__offer-selector">
-                        <input class="event__offer-checkbox  visually-hidden" id="${id}" type="checkbox" name="event-offer-luggage" ${(offers.includes(id)) ? 'checked' : ''}>
+                        <input class="event__offer-checkbox  visually-hidden" id="${id}" type="checkbox" name="event-offer-luggage" ${(offers.includes(id)) ? 'checked' : '' } ${isDisabled ? 'disabled' : ''}>
                         <label class="event__offer-label" for="${id}">
                           <span class="event__offer-title">${title}</span>
                           &plus;&euro;&nbsp;
@@ -40,7 +40,7 @@ const createOffersTemplate = (offers, offersObject) => {
 };
 
 const createEditPointFormTemplate = (data, destinations, isCreateFormView) => {
-  const {type, basePrice, offers, offersObject, dateFrom, dateTo, destinationObject, isSaving, isDeleting} = data;
+  const {type, basePrice, offers, offersObject, dateFrom, dateTo, destinationObject, isSaving, isDisabled, isDeleting} = data;
   return `<li class="trip-events__item">
               <form class="event event--edit" action="#" method="post">
                 <header class="event__header">
@@ -49,7 +49,7 @@ const createEditPointFormTemplate = (data, destinations, isCreateFormView) => {
                       <span class="visually-hidden">Choose event type</span>
                       <img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">
                     </label>
-                    <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
+                    <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox" ${isDisabled ? 'disabled' : ''}>
 
                     <div class="event__type-list">
                       <fieldset class="event__type-group">
@@ -104,18 +104,18 @@ const createEditPointFormTemplate = (data, destinations, isCreateFormView) => {
                   </div>
 
                   <div class="event__field-group  event__field-group--destination">
-                    <label class="event__label  event__type-output" for="event-destination-1">
+                    <label class="event__label  event__type-output" for="event-destination-1" ${isDisabled ? 'disabled' : ''}>
                         ${type}
                     </label>
-                    ${createDestinationsContainerTemplate({destinations, destinationObject})}
+                    ${createDestinationsContainerTemplate({destinations, destinationObject, isDisabled})}
                   </div>
 
                   <div class="event__field-group  event__field-group--time">
                     <label class="visually-hidden" for="event-start-time-1">From</label>
-                    <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${(dateFrom) ? dayjs(dateFrom).format(EDIT_TRIP_POINT_DATE_FORMAT) : ''}">
+                    <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${(dateFrom) ? dayjs(dateFrom).format(EDIT_TRIP_POINT_DATE_FORMAT) : ''}" ${isDisabled ? 'disabled' : ''}>
                     &mdash;
                     <label class="visually-hidden" for="event-end-time-1">To</label>
-                    <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${(dateTo) ? dayjs(dateTo).format(EDIT_TRIP_POINT_DATE_FORMAT) : ''}">
+                    <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${(dateTo) ? dayjs(dateTo).format(EDIT_TRIP_POINT_DATE_FORMAT) : ''}" ${isDisabled ? 'disabled' : ''}>
                   </div>
 
                   <div class="event__field-group  event__field-group--price">
@@ -123,14 +123,14 @@ const createEditPointFormTemplate = (data, destinations, isCreateFormView) => {
                       <span class="visually-hidden">Price</span>
                       &euro;
                     </label>
-                    <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${basePrice}">
+                    <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${basePrice}" ${isDisabled ? 'disabled' : ''}>
                   </div>
 
-                  <button class="event__save-btn  btn  btn--blue" type="submit">${ (isSaving) ? 'Saving...' : 'Save'}</button>
+                  <button class="event__save-btn  btn  btn--blue" type="submit" ${isDisabled ? 'disabled' : ''}>${ (isSaving) ? 'Saving...' : 'Save'}</button>
                   ${ (isCreateFormView) ? `
                     <button class="event__reset-btn" type="reset">Cansel</button>
                     ` : `
-                    <button class="event__reset-btn" type="reset">${ (isDeleting) ? 'Deleting...' : 'Delete'}</button>
+                    <button class="event__reset-btn" type="reset" ${isDisabled ? 'disabled' : ''}>${ (isDeleting) ? 'Deleting...' : 'Delete'}</button>
                     <button class="event__rollup-btn" type="button">
                       <span class="visually-hidden">Open event</span>
                     </button>
@@ -143,7 +143,7 @@ const createEditPointFormTemplate = (data, destinations, isCreateFormView) => {
                       <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
                       <div class="event__available-offers">
-                        ${createOffersTemplate(offers, offersObject)}
+                        ${createOffersTemplate(offers, offersObject, isDisabled)}
                       </div>
                     ` : ''}
                   </section>

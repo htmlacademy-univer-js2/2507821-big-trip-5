@@ -65,5 +65,5 @@ Promise.all([
   offersModel.init(),
   destinationsModel.init()]).
   then(() => {
-    pointsModel.init().finally(() => render(newTaskButtonComponent, siteHeaderContainer));
+    pointsModel.init().then(() => render(newTaskButtonComponent, siteHeaderContainer)).catch(() => render(new NewTripPointButtonView({isDisabled: true}), siteHeaderContainer));
   });

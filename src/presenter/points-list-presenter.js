@@ -9,6 +9,7 @@ import { filter } from '../utils/filter';
 import NewPointPresenter from './new-trip-point-presenter';
 import LoadingView from '../view/loading-view';
 import UiBlocker from '../framework/ui-blocker/ui-blocker';
+import AbortView from '../view/abort-view';
 
 const TimeLimit = {
   LOWER_LIMIT: 350,
@@ -20,6 +21,7 @@ export default class PointsListPresenter {
   #sortComponent = null;
   #tripEventsListComponent = new TripEventsListView();
   #loadingComponent = new LoadingView();
+  #abortComponent = new AbortView();
 
   #addNewPointPresenter = null;
   #noPointsView = null;
@@ -31,6 +33,7 @@ export default class PointsListPresenter {
   #offersModel = null;
   #filterType = FilterType.EVERYTHING;
   #isLoading = true;
+  #isAbort = false;
   #uiBlocker = new UiBlocker({
     lowerLimit: TimeLimit.LOWER_LIMIT,
     upperLimit: TimeLimit.UPPER_LIMIT
@@ -93,6 +96,7 @@ export default class PointsListPresenter {
     remove(this.#sortComponent);
     this.#addNewPointPresenter.destroy();
     remove(this.#loadingComponent);
+    remove(this.#abortComponent);
 
     if (resetSortType) {
       this.#currentSortType = SortType.DEFAULT;
@@ -106,6 +110,11 @@ export default class PointsListPresenter {
   #renderBoard() {
     this.#renderSort();
     render(this.#tripEventsListComponent, this.#contentContainer);
+
+    if (this.#isAbort) {
+      this.#renderAbort();
+      return;
+    }
 
     if (this.#isLoading) {
       this.#renderLoading();
@@ -162,6 +171,10 @@ export default class PointsListPresenter {
     render(this.#loadingComponent, this.#contentContainer);
   }
 
+  #renderAbort() {
+    render(this.#abortComponent, this.#contentContainer);
+  }
+
   #handleTripPointModeChange = () => {
     this.#addNewPointPresenter.destroy();
     this.#tripPointPresenters.forEach((presenter) => presenter.resetView());
@@ -216,6 +229,12 @@ export default class PointsListPresenter {
       case UpdateType.INIT:
         this.#isLoading = false;
         remove(this.#loadingComponent);
+        this.#clearBoard();
+        this.#renderBoard();
+        break;
+      case UpdateType.ABORT:
+        this.#isAbort = true;
+        render(this.#abortComponent, this.#contentContainer);
         this.#clearBoard();
         this.#renderBoard();
         break;
