@@ -100,6 +100,7 @@ export default class TripPointPresenter {
   setSaving() {
     if (this.#mode === Mode.EDITING) {
       this.#pointEditComponent.updateElement({
+        isDisabled: true,
         isSaving: true,
       });
     }
@@ -108,6 +109,7 @@ export default class TripPointPresenter {
   setDeleting() {
     if (this.#mode === Mode.EDITING) {
       this.#pointEditComponent.updateElement({
+        isDisabled: true,
         isDeleting: true,
       });
     }
@@ -133,6 +135,7 @@ export default class TripPointPresenter {
 
     const resetFormState = () => {
       this.#pointEditComponent.updateElement({
+        isDisabled: false,
         isSaving: false,
         isDeleting: false,
       });
